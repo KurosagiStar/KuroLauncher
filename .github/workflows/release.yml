@@ -27,9 +27,11 @@ jobs:
 
       - name: Publish KuroLauncher.exe
         shell: pwsh
+        env:
+          CF_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
         run: |
-          if ("${{ secrets.CURSEFORGE_API_KEY }}" -ne "") {
-            "CURSEFORGE_API_KEY='${{ secrets.CURSEFORGE_API_KEY }}'" | Out-File -FilePath .env -Encoding utf8
+          if (-not [string]::IsNullOrWhiteSpace($env:CF_KEY)) {
+            Set-Content -Path .env -Value "CURSEFORGE_API_KEY=$($env:CF_KEY)" -Encoding UTF8
           }
           dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=$env:APP_VERSION -p:AssemblyVersion=$env:APP_VERSION -p:FileVersion=$env:APP_VERSION -o release
 
