@@ -69,8 +69,8 @@ public static class UpdateService
             }
         }
 
-        var chosenUrl = setupUrl ?? exeUrl;
-        var chosenName = setupName ?? exeName;
+        var chosenUrl = exeUrl ?? setupUrl;
+        var chosenName = exeName ?? setupName;
         if (string.IsNullOrEmpty(chosenUrl) || string.IsNullOrEmpty(chosenName))
             return null;
 
