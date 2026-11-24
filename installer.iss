@@ -1,7 +1,11 @@
+#ifndef MyAppVersion
+  #define MyAppVersion "1.0.0"
+#endif
+
 [Setup]
 AppId={{8E7B4F2C-9D31-4B6E-A123-KUROLAUNCHER01}
 AppName=Kuro Launcher
-AppVersion=1.0.0
+AppVersion={#MyAppVersion}
 AppPublisher=Kuro
 DefaultDirName={localappdata}\KuroLauncher
 DefaultGroupName=Kuro Launcher

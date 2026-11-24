@@ -83,29 +83,33 @@ public static class UpdateService
         var tempFile = Path.Combine(Path.GetTempPath(), info.FileName);
         await CurseForgeService.DownloadFileAsync(info.DownloadUrl, tempFile);
 
-        if (info.FileName.Contains("Setup", StringComparison.OrdinalIgnoreCase))
-        {
-            Process.Start(new ProcessStartInfo(tempFile)
-            {
-                Arguments = "/SILENT /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS",
-                UseShellExecute = true
-            });
-            Environment.Exit(0);
-            return;
-        }
-
         var currentExe = Environment.ProcessPath;
         if (string.IsNullOrEmpty(currentExe))
             throw new Exception("No se pudo determinar la ruta del ejecutable actual.");
 
         var batPath = Path.Combine(Path.GetTempPath(), "kuro_update.cmd");
-        var script = $"""
-            @echo off
-            timeout /t 1 /nobreak >nul
-            move /y "{tempFile}" "{currentExe}" >nul
-            start "" "{currentExe}"
-            del "%~f0"
-            """;
+        string script;
+        if (info.FileName.Contains("Setup", StringComparison.OrdinalIgnoreCase))
+        {
+            script = $"""
+                @echo off
+                timeout /t 1 /nobreak >nul
+                start /wait "" "{tempFile}" /SILENT /CLOSEAPPLICATIONS /NORESTART
+                start "" "{currentExe}"
+                del "{tempFile}" >nul 2>&1
+                del "%~f0"
+                """;
+        }
+        else
+        {
+            script = $"""
+                @echo off
+                timeout /t 1 /nobreak >nul
+                move /y "{tempFile}" "{currentExe}" >nul
+                start "" "{currentExe}"
+                del "%~f0"
+                """;
+        }
         File.WriteAllText(batPath, script);
 
         Process.Start(new ProcessStartInfo("cmd.exe", $"/c \"{batPath}\"")
