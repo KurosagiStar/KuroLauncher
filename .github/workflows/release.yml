@@ -42,10 +42,41 @@ jobs:
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           & $iscc "/DMyAppVersion=$env:APP_VERSION" installer.iss
 
+      - name: Sign binaries & generate SHA256SUMS
+        shell: pwsh
+        env:
+          PFX_B64: ${{ secrets.SIGN_CERT_PFX_BASE64 }}
+          PFX_PASS: ${{ secrets.SIGN_CERT_PASSWORD }}
+        run: |
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $signtool) { throw "signtool.exe not found" }
+
+          $pfxPath = "$env:TEMP\kuro_sign.pfx"
+          if (-not [string]::IsNullOrWhiteSpace($env:PFX_B64)) {
+            [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:PFX_B64))
+            $pass = $env:PFX_PASS
+          } else {
+            $pass = "KuroLauncherSign2026!"
+            $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=Kuro Launcher" -CertStoreLocation "Cert:\CurrentUser\My" -NotAfter (Get-Date).AddYears(5)
+            $secPass = ConvertTo-SecureString -String $pass -Force -AsPlainText
+            Export-PfxCertificate -Cert $cert -FilePath $pfxPath -Password $secPass | Out-Null
+          }
+
+          foreach ($file in @("release\KuroLauncher.exe", "release\KuroLauncher-Setup.exe")) {
+            & $signtool sign /fd SHA256 /f $pfxPath /p $pass /tr http://timestamp.digicert.com /td SHA256 $file
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Remove-Item $pfxPath -Force -ErrorAction SilentlyContinue
+
+          Get-FileHash release\KuroLauncher.exe, release\KuroLauncher-Setup.exe -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLower())  $(Split-Path $_.Path -Leaf)" } |
+            Set-Content -Path release\SHA256SUMS.txt -Encoding UTF8
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             release/KuroLauncher.exe
             release/KuroLauncher-Setup.exe
+            release/SHA256SUMS.txt
           generate_release_notes: true
