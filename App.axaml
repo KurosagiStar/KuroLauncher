@@ -1,0 +1,255 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="KuroLauncher.App"
+             RequestedThemeVariant="Dark">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://KuroLauncher/Styles/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Balanced Obsidian Noir + Deep Violet Surface Hierarchy (Minimal Outlines) -->
+      <SolidColorBrush x:Key="GlassCardBg" Color="#FF19152F" />
+      <SolidColorBrush x:Key="GlassCardHoverBg" Color="#FF201B3B" />
+      <SolidColorBrush x:Key="GlassBorder" Color="#14FFFFFF" />
+      <SolidColorBrush x:Key="GlassBorderStrong" Color="#24FFFFFF" />
+      <SolidColorBrush x:Key="GlassInnerBg" Color="#FF110E22" />
+      <SolidColorBrush x:Key="TextPrimary" Color="#F5F3FF" />
+      <SolidColorBrush x:Key="TextMuted" Color="#9D96B8" />
+      <SolidColorBrush x:Key="AccentViolet" Color="#A78BFA" />
+      <SolidColorBrush x:Key="AccentCyan" Color="#DDD6FE" />
+      <SolidColorBrush x:Key="AccentEmerald" Color="#34D399" />
+      <SolidColorBrush x:Key="AccentRose" Color="#FB7185" />
+
+      <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#A78BFA" Offset="0" />
+        <GradientStop Color="#8B74E8" Offset="1" />
+      </LinearGradientBrush>
+      <LinearGradientBrush x:Key="PrimaryGradientHover" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#B8A2FF" Offset="0" />
+        <GradientStop Color="#9D88F2" Offset="1" />
+      </LinearGradientBrush>
+      <SolidColorBrush x:Key="AvatarGradient" Color="#2D1E52" />
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+
+    <!-- Electric Violet Pill Primary Button (Consistent 36px Height) -->
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource PrimaryGradient}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="99" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Padding" Value="16,0" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource PrimaryGradientHover}" />
+    </Style>
+
+    <!-- Deep Noir Secondary Button (Consistent 36px Height) -->
+    <Style Selector="Button.glass-btn">
+      <Setter Property="Background" Value="#FF231E42" />
+      <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="99" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Padding" Value="14,0" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.glass-btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#FF2D2654" />
+    </Style>
+
+    <!-- Danger button (Consistent 36px Height) -->
+    <Style Selector="Button.danger">
+      <Setter Property="Background" Value="#2BE11D48" />
+      <Setter Property="Foreground" Value="#FDA4AF" />
+      <Setter Property="BorderBrush" Value="#55FB7185" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="99" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Padding" Value="14,0" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#4FE11D48" />
+    </Style>
+
+    <!-- Reference Segmented Pill Nav (Active = Solid White + Black Text + Violet Icon!) -->
+    <Style Selector="Button.nav-tab">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#B4AEC9" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="99" />
+      <Setter Property="Padding" Value="15,7" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.nav-tab PathIcon">
+      <Setter Property="Foreground" Value="#B4AEC9" />
+    </Style>
+    <Style Selector="Button.nav-tab:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1CFFFFFF" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.nav-tab:pointerover PathIcon">
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.nav-tab.active">
+      <Setter Property="Background" Value="#FFFFFF" />
+      <Setter Property="Foreground" Value="#080510" />
+    </Style>
+    <Style Selector="Button.nav-tab.active TextBlock">
+      <Setter Property="Foreground" Value="#080510" />
+    </Style>
+    <Style Selector="Button.nav-tab.active PathIcon">
+      <Setter Property="Foreground" Value="#8B74E8" />
+    </Style>
+    <Style Selector="Button.nav-tab.active:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#F3F0FF" />
+      <Setter Property="Foreground" Value="#080510" />
+    </Style>
+    <Style Selector="Button.nav-tab.active:pointerover PathIcon">
+      <Setter Property="Foreground" Value="#7C6AC4" />
+    </Style>
+
+    <!-- Obsidian Noir + Violet MenuFlyout for Instance Options -->
+    <Style Selector="MenuFlyoutPresenter">
+      <Setter Property="Background" Value="{StaticResource GlassCardBg}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GlassBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="16" />
+      <Setter Property="Padding" Value="6" />
+    </Style>
+    <Style Selector="MenuItem">
+      <Setter Property="Foreground" Value="#F5F3FF" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="10,7" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="MenuItem:pointerover /template/ Border#PART_LayoutRoot">
+      <Setter Property="Background" Value="#38A78BFA" />
+    </Style>
+
+    <!-- Window chrome control button -->
+    <Style Selector="Button.win-btn">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#B4AEC9" />
+      <Setter Property="Width" Value="30" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="CornerRadius" Value="99" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.win-btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#24FFFFFF" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.win-btn.close:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#D8E11D48" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <!-- Reference Dark Violet Gradient Card with Luminous Violet Rim -->
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{StaticResource GlassCardBg}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GlassBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="20" />
+      <Setter Property="BoxShadow" Value="0 12 30 0 #80000000" />
+    </Style>
+    <Style Selector="Border.card.interactive:pointerover">
+      <Setter Property="Background" Value="{StaticResource GlassCardHoverBg}" />
+      <Setter Property="BorderBrush" Value="{StaticResource GlassBorderStrong}" />
+    </Style>
+    <Style Selector="Border.detail-row">
+      <Setter Property="Background" Value="{StaticResource GlassInnerBg}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="11" />
+    </Style>
+    <Style Selector="Border.detail-row:pointerover">
+      <Setter Property="Background" Value="#FF1E1938" />
+    </Style>
+
+    <!-- Deep Violet Pill Inputs & Combos (Distinct #090714 Recessed Surface) -->
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="#FF090714" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Foreground" Value="#F5F3FF" />
+      <Setter Property="Padding" Value="12,9" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="#FF141028" />
+      <Setter Property="BorderBrush" Value="#24FFFFFF" />
+    </Style>
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="#FF191533" />
+      <Setter Property="BorderBrush" Value="#38FFFFFF" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="ComboBox">
+      <Setter Property="Background" Value="#FF090714" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Foreground" Value="#F5F3FF" />
+      <Setter Property="Padding" Value="12,8" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="ComboBox:pointerover /template/ Border#Background">
+      <Setter Property="Background" Value="#FF141028" />
+      <Setter Property="BorderBrush" Value="#24FFFFFF" />
+    </Style>
+    <Style Selector="ComboBoxItem">
+      <Setter Property="Foreground" Value="#F5F3FF" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="Foreground" Value="#D8D2EE" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- Thicker, clean ScrollBar -->
+    <Style Selector="ScrollViewer">
+      <Setter Property="AllowAutoHide" Value="False" />
+    </Style>
+    <Style Selector="ScrollBar:vertical">
+      <Setter Property="Width" Value="10" />
+      <Setter Property="MinWidth" Value="10" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ScrollBar:vertical /template/ Thumb">
+      <Setter Property="Background" Value="#6B5B95" />
+      <Setter Property="CornerRadius" Value="99" />
+    </Style>
+    <Style Selector="ScrollBar:vertical /template/ Thumb:pointerover">
+      <Setter Property="Background" Value="#A78BFA" />
+    </Style>
+  </Application.Styles>
+</Application>

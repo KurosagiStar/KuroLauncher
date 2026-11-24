@@ -1,0 +1,863 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="KuroLauncher.MainWindow"
+        Title="Kuro Launcher"
+        Icon="avares://KuroLauncher/Assets/app-icon.ico"
+        Width="1280" Height="820"
+        MinWidth="980" MinHeight="640"
+        FontFamily="Segoe UI Variable, Segoe UI, Inter, sans-serif"
+        WindowStartupLocation="CenterScreen"
+        TransparencyLevelHint="AcrylicBlur,Mica,Blur,Transparent"
+        Background="#040208"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1">
+
+  <Grid>
+    <!-- Reference 1 Obsidian Noir Background + Subtle Violet Grid + Top Violet Halo -->
+    <Border IsHitTestVisible="False" Background="#040208" />
+    <Border IsHitTestVisible="False">
+      <Border.Background>
+        <VisualBrush TileMode="Tile" SourceRect="0,0,48,48" DestinationRect="0,0,48,48">
+          <VisualBrush.Visual>
+            <Border Width="48" Height="48" BorderBrush="#127C3AED" BorderThickness="0,0,1,1" />
+          </VisualBrush.Visual>
+        </VisualBrush>
+      </Border.Background>
+    </Border>
+    <Border IsHitTestVisible="False">
+      <Border.Background>
+        <RadialGradientBrush Center="50%,8%" GradientOrigin="50%,8%" RadiusX="65%" RadiusY="50%">
+          <GradientStop Color="#166D28D9" Offset="0" />
+          <GradientStop Color="#00040208" Offset="1" />
+        </RadialGradientBrush>
+      </Border.Background>
+    </Border>
+    <Border IsHitTestVisible="False">
+      <Border.Background>
+        <RadialGradientBrush Center="50%,50%" GradientOrigin="50%,50%" RadiusX="70%" RadiusY="70%">
+          <GradientStop Color="#00040208" Offset="0.45" />
+          <GradientStop Color="#DD030106" Offset="1" />
+        </RadialGradientBrush>
+      </Border.Background>
+    </Border>
+
+    <!-- Custom background image with real Skia GPU BlurEffect & brightness -->
+    <Panel x:Name="BgImageHost" IsVisible="False" IsHitTestVisible="False" ClipToBounds="True">
+      <Image x:Name="BgImage" Stretch="UniformToFill" Margin="-60" />
+      <Border x:Name="BgDimOverlay" Background="#700B0D18" />
+    </Panel>
+
+    <!-- Main Layout: Left Sidebar + Right Content -->
+    <Grid ColumnDefinitions="Auto,*">
+      <!-- Left Sidebar Panel (Brand + Vertical Nav Tabs + Account) -->
+      <Border Grid.Column="0" Width="226" Margin="16,14,8,16" CornerRadius="22" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="14,16" BoxShadow="0 12 30 0 #80000000" PointerPressed="TitleBar_PointerPressed">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <!-- Brand -->
+          <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="4,0,0,22" IsHitTestVisible="False">
+            <Image Source="avares://KuroLauncher/Assets/app-icon.ico" Width="28" Height="28" VerticalAlignment="Center" />
+            <TextBlock Text="KURO LAUNCHER" FontWeight="Bold" FontSize="13" Foreground="White" LetterSpacing="1.1" VerticalAlignment="Center" />
+          </StackPanel>
+
+          <!-- Vertical Nav Tabs -->
+          <StackPanel Grid.Row="1" Spacing="5">
+            <Button x:Name="NavInstancesBtn" Classes="nav-tab active" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="13,10" Click="Nav_Click" Tag="instances">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource IconLayers}" Width="14" Height="14" />
+                <TextBlock Text="Instancias" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavCurseForgeBtn" Classes="nav-tab" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="13,10" Click="Nav_Click" Tag="curseforge">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource IconCompass}" Width="14" Height="14" />
+                <TextBlock Text="Modpacks CurseForge" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavConsoleBtn" Classes="nav-tab" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="13,10" Click="Nav_Click" Tag="console">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource IconTerminal}" Width="14" Height="14" />
+                <TextBlock Text="Consola" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button x:Name="NavSettingsBtn" Classes="nav-tab" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="13,10" Click="Nav_Click" Tag="settings">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <PathIcon Data="{StaticResource IconSettings}" Width="14" Height="14" />
+                <TextBlock Text="Ajustes" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+
+          <!-- Bottom: Account Pill -->
+          <Button x:Name="AccountBtn" Grid.Row="2" Classes="primary" HorizontalAlignment="Stretch" Padding="12,0" Click="OpenAccount_Click">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Image x:Name="AccountMsIcon" Source="{StaticResource IconMicrosoftColor}" Width="14" Height="14" IsVisible="False" VerticalAlignment="Center" />
+              <PathIcon x:Name="AccountIcon" Data="{StaticResource IconUser}" Width="13" Height="13" Foreground="White" />
+              <TextBlock x:Name="AccountLabel" Text="Iniciar sesión" VerticalAlignment="Center" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </Button>
+        </Grid>
+      </Border>
+
+      <!-- Right Column: Minimal Window Chrome + Main Content Views -->
+      <Grid Grid.Column="1" RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="10,12,18,2" Background="Transparent" PointerPressed="TitleBar_PointerPressed">
+          <Border Grid.Column="0" Background="Transparent" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
+            <Button Classes="win-btn" Click="Minimize_Click" ToolTip.Tip="Minimizar">
+              <PathIcon Data="{StaticResource IconMinimize}" Width="12" Height="12" />
+            </Button>
+            <Button Classes="win-btn" Click="Maximize_Click" ToolTip.Tip="Maximizar">
+              <PathIcon Data="{StaticResource IconMaximize}" Width="11" Height="11" />
+            </Button>
+            <Button Classes="win-btn close" Click="Close_Click" ToolTip.Tip="Cerrar">
+              <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <!-- Main Content Views -->
+        <Grid Grid.Row="1">
+        <!-- 1. INSTANCES VIEW -->
+        <Grid x:Name="ViewInstances" RowDefinitions="Auto,*" Margin="24,6,24,18">
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Tus Instancias" FontSize="24" FontWeight="Bold" Foreground="White" />
+              <TextBlock Text="Administra modpacks descargados o importa instancias locales por carpeta o ZIP." FontSize="12" Foreground="{StaticResource TextMuted}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+              <!-- Instances View Mode Switcher -->
+              <Border CornerRadius="99" Background="#FF05030A" BorderBrush="#22FFFFFF" BorderThickness="1" Padding="3" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                  <Button x:Name="ViewGridBtn" Classes="nav-tab active" Padding="9,6" Click="InstancesViewMode_Click" Tag="grid" ToolTip.Tip="Vista de tarjetas">
+                    <PathIcon Data="{StaticResource IconViewGrid}" Width="13" Height="13" />
+                  </Button>
+                  <Button x:Name="ViewCompactBtn" Classes="nav-tab" Padding="9,6" Click="InstancesViewMode_Click" Tag="compact" ToolTip.Tip="Vista compacta">
+                    <PathIcon Data="{StaticResource IconViewCompact}" Width="13" Height="13" />
+                  </Button>
+                  <Button x:Name="ViewListBtn" Classes="nav-tab" Padding="9,6" Click="InstancesViewMode_Click" Tag="list" ToolTip.Tip="Vista de lista">
+                    <PathIcon Data="{StaticResource IconViewList}" Width="13" Height="13" />
+                  </Button>
+                </StackPanel>
+              </Border>
+              <Button Classes="glass-btn" Padding="13,9" Click="ImportZip_Click">
+                <StackPanel Orientation="Horizontal" Spacing="7">
+                  <PathIcon Data="{StaticResource IconZip}" Width="14" Height="14" Foreground="#38BDF8" />
+                  <TextBlock Text="Importar .ZIP / .RAR" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Classes="glass-btn" Padding="13,9" Click="OpenImportFolder_Click">
+                <StackPanel Orientation="Horizontal" Spacing="7">
+                  <PathIcon Data="{StaticResource IconFolder}" Width="14" Height="14" Foreground="#34D399" />
+                  <TextBlock Text="Importar Carpeta" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Classes="primary" Padding="16,9" Click="OpenCreateInstance_Click">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource IconPlus}" Width="14" Height="14" />
+                  <TextBlock Text="Nueva" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Grid>
+
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Panel>
+              <StackPanel x:Name="EmptyInstancesPanel" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" Margin="0,80,0,0">
+                <Border Width="56" Height="56" CornerRadius="14" Background="#BA0E1424" BorderBrush="#22FFFFFF" BorderThickness="1" HorizontalAlignment="Center">
+                  <PathIcon Data="{StaticResource IconLayers}" Width="24" Height="24" Foreground="#6EE7B7" />
+                </Border>
+                <TextBlock Text="Aún no tienes instancias" FontSize="16" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" />
+                <TextBlock Text="Explora Modpacks CurseForge o crea/importa una instancia arriba." FontSize="12" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+              </StackPanel>
+              <WrapPanel x:Name="InstancesWrap" Orientation="Horizontal" />
+              <StackPanel x:Name="InstancesList" IsVisible="False" Spacing="10" />
+            </Panel>
+          </ScrollViewer>
+        </Grid>
+
+        <!-- 2. MODPACKS CURSEFORGE VIEW -->
+        <Grid x:Name="ViewCurseForge" IsVisible="False" RowDefinitions="Auto,Auto,*" Margin="24,6,24,18">
+          <StackPanel Grid.Row="0" Spacing="2" Margin="0,0,0,12">
+            <TextBlock Text="Modpacks CurseForge" FontSize="24" FontWeight="Bold" Foreground="White" />
+            <TextBlock Text="Descarga el cliente como instancia o baja el Server Pack oficial listo para tu servidor." FontSize="12" Foreground="{StaticResource TextMuted}" />
+          </StackPanel>
+
+          <Border Grid.Row="1" CornerRadius="99" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="8" Margin="0,0,0,16">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+              <TextBox x:Name="CfSearchBox" Grid.Column="0" CornerRadius="99" Watermark="Buscar modpacks (ej: RLCraft, Better MC, All the Mods, Cobblemon)..." KeyDown="CfSearchBox_KeyDown" Margin="0,0,8,0" />
+              <ComboBox x:Name="CfVersionCombo" Grid.Column="1" CornerRadius="99" Width="130" Margin="0,0,8,0" SelectionChanged="CfFilter_Changed" />
+              <ComboBox x:Name="CfLoaderCombo" Grid.Column="2" CornerRadius="99" Width="130" Margin="0,0,8,0" SelectionChanged="CfFilter_Changed" />
+              <ComboBox x:Name="CfSortCombo" Grid.Column="3" CornerRadius="99" Width="150" Margin="0,0,8,0" SelectionChanged="CfFilter_Changed" />
+              <Button x:Name="CfSearchBtn" Grid.Column="4" Classes="primary" Padding="18,8" Click="CfSearch_Click">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource IconSearch}" Width="14" Height="14" />
+                  <TextBlock Text="Buscar" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+          </Border>
+
+          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <Panel>
+              <TextBlock x:Name="CfLoadingText" Text="Cargando modpacks desde CurseForge..." IsVisible="False" HorizontalAlignment="Center" Margin="0,60,0,0" Foreground="{StaticResource TextMuted}" />
+              <WrapPanel x:Name="CfWrap" Orientation="Horizontal" />
+            </Panel>
+          </ScrollViewer>
+        </Grid>
+
+        <!-- 3. CONSOLE VIEW -->
+        <Grid x:Name="ViewConsole" IsVisible="False" RowDefinitions="Auto,*" Margin="24,6,24,18">
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Consola" FontSize="24" FontWeight="Bold" Foreground="White" />
+              <TextBlock x:Name="ConsoleCountText" Text="Salida en tiempo real de tus instancias de Minecraft." FontSize="12" Foreground="{StaticResource TextMuted}" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="glass-btn" Padding="13,8" VerticalAlignment="Center" Click="ClearLogs_Click">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon Data="{StaticResource IconTrash}" Width="14" Height="14" />
+                <TextBlock Text="Limpiar" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </Grid>
+
+          <Border Grid.Row="1" Classes="card" Padding="14">
+            <ScrollViewer x:Name="ConsoleScroll" VerticalScrollBarVisibility="Auto">
+              <TextBox x:Name="ConsoleText"
+                       IsReadOnly="True"
+                       AcceptsReturn="True"
+                       TextWrapping="Wrap"
+                       Background="Transparent"
+                       BorderThickness="0"
+                       FontFamily="Consolas, Cascadia Mono, monospace"
+                       FontSize="11.5"
+                       Foreground="#D8DCEB"
+                       Text="Esperando inicio de Minecraft..." />
+            </ScrollViewer>
+          </Border>
+        </Grid>
+
+        <!-- 4. SETTINGS VIEW -->
+        <Grid x:Name="ViewSettings" IsVisible="False" RowDefinitions="Auto,*" Margin="24,6,24,0">
+          <Grid Grid.Row="0" MaxWidth="820" HorizontalAlignment="Stretch" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <StackPanel Spacing="2">
+              <TextBlock Text="Ajustes" FontSize="24" FontWeight="Bold" Foreground="White" />
+              <TextBlock Text="Configuración general del launcher y personalización visual." FontSize="12" Foreground="{StaticResource TextMuted}" />
+            </StackPanel>
+            <Border Grid.Column="1" CornerRadius="99" Padding="4" Background="#D6090D18" BorderBrush="#22FFFFFF" BorderThickness="1" VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <Button x:Name="SettingsGeneralBtn" Classes="nav-tab active" Click="SettingsTab_Click" Tag="general">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconSliders}" Width="13" Height="13" />
+                    <TextBlock Text="General" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button x:Name="SettingsAppearanceBtn" Classes="nav-tab" Click="SettingsTab_Click" Tag="appearance">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconPalette}" Width="13" Height="13" />
+                    <TextBlock Text="Apariencia" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
+            <StackPanel MaxWidth="820" Spacing="14" Margin="0,0,0,90">
+              <!-- GENERAL -->
+              <StackPanel x:Name="SettingsGeneralPanel" Spacing="14">
+                <Border Classes="card" Padding="18">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="Runtime de Java" FontSize="14" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
+                      <Button Grid.Column="1" Classes="glass-btn" Padding="11,6" Click="DetectJava_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                          <PathIcon Data="{StaticResource IconSearch}" Width="13" Height="13" />
+                          <TextBlock Text="Auto-detectar" VerticalAlignment="Center" />
+                        </StackPanel>
+                      </Button>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBox x:Name="SettingsJavaBox" Grid.Column="0" FontFamily="Consolas, monospace" TextChanged="SettingsDraft_Changed" Margin="0,0,8,0" />
+                      <Button Grid.Column="1" Classes="glass-btn" Padding="12,8" Content="Explorar" Click="PickJava_Click" />
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="card" Padding="18">
+                  <StackPanel Spacing="10">
+                    <TextBlock Text="Memoria RAM global" FontSize="14" FontWeight="SemiBold" Foreground="White" />
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="RAM Máxima" FontSize="12" Foreground="{StaticResource TextMuted}" />
+                      <TextBlock x:Name="SettingsMaxRamLabel" Grid.Column="1" FontSize="12" FontFamily="Consolas, monospace" Foreground="#6EE7B7" />
+                    </Grid>
+                    <Slider x:Name="SettingsMaxRamSlider" Minimum="2048" Maximum="16384" TickFrequency="512" IsSnapToTickEnabled="True" ValueChanged="SettingsRam_Changed" />
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="RAM Mínima" FontSize="12" Foreground="{StaticResource TextMuted}" />
+                      <TextBlock x:Name="SettingsMinRamLabel" Grid.Column="1" FontSize="12" FontFamily="Consolas, monospace" Foreground="#38BDF8" />
+                    </Grid>
+                    <Slider x:Name="SettingsMinRamSlider" Minimum="1024" Maximum="16384" TickFrequency="512" IsSnapToTickEnabled="True" ValueChanged="SettingsRam_Changed" />
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="card" Padding="18">
+                  <StackPanel Spacing="10">
+                    <TextBlock Text="Carpetas" FontSize="14" FontWeight="SemiBold" Foreground="White" />
+                    <TextBlock Text="Instancias de cliente" FontSize="11" Foreground="{StaticResource TextMuted}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBox x:Name="SettingsInstancesDirBox" Grid.Column="0" FontFamily="Consolas, monospace" TextChanged="SettingsDraft_Changed" Margin="0,0,8,0" />
+                      <Button Grid.Column="1" Classes="glass-btn" Padding="10,8" Click="PickInstancesDir_Click">
+                        <PathIcon Data="{StaticResource IconFolder}" Width="14" Height="14" />
+                      </Button>
+                    </Grid>
+                    <TextBlock Text="Descargas de Server Packs" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,4,0,0" />
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBox x:Name="SettingsServersDirBox" Grid.Column="0" FontFamily="Consolas, monospace" TextChanged="SettingsDraft_Changed" Margin="0,0,8,0" />
+                      <Button Grid.Column="1" Classes="glass-btn" Padding="10,8" Click="PickServersDir_Click">
+                        <PathIcon Data="{StaticResource IconFolder}" Width="14" Height="14" />
+                      </Button>
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="card" Padding="18">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="3" VerticalAlignment="Center">
+                      <TextBlock Text="Actualizaciones del launcher" FontSize="14" FontWeight="SemiBold" Foreground="White" />
+                      <TextBlock x:Name="UpdateStatusText" Text="Versión actual: v1.0.0 · GitHub (KurosagiStar/KuroLauncher)" FontSize="11.5" Foreground="{StaticResource TextMuted}" />
+                    </StackPanel>
+                    <Button x:Name="CheckUpdateBtn" Grid.Column="1" Classes="glass-btn" Click="CheckLauncherUpdate_Click">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <PathIcon Data="{StaticResource IconRotate}" Width="13" Height="13" />
+                        <TextBlock x:Name="CheckUpdateBtnText" Text="Buscar actualizaciones" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                  </Grid>
+                </Border>
+              </StackPanel>
+
+              <!-- APPEARANCE -->
+              <StackPanel x:Name="SettingsAppearancePanel" IsVisible="False" Spacing="14">
+                <Border Classes="card" Padding="18">
+                  <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource IconImage}" Width="16" Height="16" Foreground="#6EE7B7" />
+                        <TextBlock Text="Fondo de pantalla" FontSize="14" FontWeight="SemiBold" Foreground="White" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="ClearBgBtn" Classes="danger" Padding="11,6" Click="ClearBg_Click" IsVisible="False">
+                          <StackPanel Orientation="Horizontal" Spacing="5">
+                            <PathIcon Data="{StaticResource IconTrash}" Width="13" Height="13" />
+                            <TextBlock Text="Quitar" VerticalAlignment="Center" />
+                          </StackPanel>
+                        </Button>
+                        <Button Classes="glass-btn" Padding="12,6" Click="PickBg_Click">
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="{StaticResource IconImage}" Width="13" Height="13" />
+                            <TextBlock Text="Elegir imagen" VerticalAlignment="Center" />
+                          </StackPanel>
+                        </Button>
+                      </StackPanel>
+                    </Grid>
+
+                    <Border Background="{StaticResource GlassInnerBg}" BorderBrush="#1CFFFFFF" BorderThickness="1" CornerRadius="10" Padding="11,8">
+                      <TextBlock x:Name="SettingsBgPathLabel" Text="Sin imagen personalizada" FontFamily="Consolas, monospace" FontSize="11" Foreground="{StaticResource TextMuted}" TextTrimming="CharacterEllipsis" />
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,*">
+                      <StackPanel Grid.Column="0" Spacing="6" Margin="0,0,12,0">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Text="Luminosidad" FontSize="12" Foreground="{StaticResource TextPrimary}" />
+                          <TextBlock x:Name="SettingsBgBrightLabel" Grid.Column="1" FontSize="12" FontFamily="Consolas, monospace" Foreground="#6EE7B7" />
+                        </Grid>
+                        <Slider x:Name="SettingsBgBrightSlider" Minimum="10" Maximum="130" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SettingsBgSlider_Changed" />
+                      </StackPanel>
+
+                      <StackPanel Grid.Column="1" Spacing="6" Margin="12,0,0,0">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Text="Desenfoque (Blur)" FontSize="12" Foreground="{StaticResource TextPrimary}" />
+                          <TextBlock x:Name="SettingsBgBlurLabel" Grid.Column="1" FontSize="12" FontFamily="Consolas, monospace" Foreground="#38BDF8" />
+                        </Grid>
+                        <Slider x:Name="SettingsBgBlurSlider" Minimum="0" Maximum="30" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SettingsBgSlider_Changed" />
+                      </StackPanel>
+                    </Grid>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Grid>
+      </Grid>
+    </Grid>
+    </Grid>
+
+    <!-- Floating Unsaved Settings Bar -->
+    <Border x:Name="UnsavedBar" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" CornerRadius="99" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="18,8,10,8" BoxShadow="0 12 30 0 #90000000">
+      <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+        <TextBlock Text="Tienes cambios sin guardar" FontSize="12" FontWeight="Medium" Foreground="White" VerticalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <Button Classes="glass-btn" CornerRadius="99" Padding="13,6" Click="CancelSettings_Click">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <PathIcon Data="{StaticResource IconRotate}" Width="12" Height="12" />
+              <TextBlock Text="Cancelar" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="primary" CornerRadius="99" Padding="15,6" Click="SaveSettings_Click">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+              <PathIcon Data="{StaticResource IconSave}" Width="12" Height="12" />
+              <TextBlock Text="Guardar" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Floating Progress Dock (bottom-right) -->
+    <Border x:Name="ProgressDock" IsVisible="False" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,22,20" Width="280" CornerRadius="18" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="14,10" BoxShadow="0 12 30 0 #90000000">
+      <StackPanel Spacing="5">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock x:Name="ProgressTitle" FontSize="12" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="ProgressPct" Grid.Column="1" FontSize="11" FontFamily="Consolas, monospace" Foreground="#C4B5FD" Margin="8,0,0,0" />
+        </Grid>
+        <TextBlock x:Name="ProgressMsg" FontSize="11" Foreground="{StaticResource TextMuted}" TextTrimming="CharacterEllipsis" />
+        <ProgressBar x:Name="ProgressBarCtrl" Minimum="0" Maximum="100" Height="5" CornerRadius="99" Foreground="#7C3AED" Background="#22FFFFFF" />
+      </StackPanel>
+    </Border>
+
+    <!-- Toast Notification (bottom-left, always above modals) -->
+    <Border x:Name="ToastBanner" ZIndex="100" IsVisible="False" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="22,0,0,20" CornerRadius="14" Padding="14,9" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" PointerPressed="Toast_Click" Cursor="Hand" BoxShadow="0 10 30 0 #B0000000">
+      <TextBlock x:Name="ToastText" FontSize="12" Foreground="White" MaxWidth="420" TextWrapping="Wrap" />
+    </Border>
+
+    <!-- MODAL: Account -->
+    <Border x:Name="AccountModal" IsVisible="False" Background="#CC04020A">
+      <Border Width="440" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="22" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="24" BoxShadow="0 20 50 0 #B0000000">
+        <StackPanel Spacing="14">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="Cuenta de Minecraft" FontSize="17" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="win-btn" Click="CloseAccount_Click">
+              <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+            </Button>
+          </Grid>
+
+          <Border x:Name="CurrentAccountCard" IsVisible="False" Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="14" Padding="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="2">
+                <TextBlock x:Name="CurrentAccountName" FontSize="14" FontWeight="SemiBold" Foreground="White" />
+                <TextBlock x:Name="CurrentAccountType" FontSize="11" Foreground="{StaticResource TextMuted}" />
+              </StackPanel>
+              <Button Grid.Column="1" Classes="danger" Padding="11,6" Content="Salir" Click="Logout_Click" />
+            </Grid>
+          </Border>
+
+          <Border x:Name="DeviceCodePanel" IsVisible="False" Background="{StaticResource GlassInnerBg}" BorderBrush="#55C4B5FD" BorderThickness="1" CornerRadius="14" Padding="14">
+            <StackPanel Spacing="8">
+              <TextBlock Text="Se abrió tu navegador. Ingresa este código en Microsoft:" FontSize="12" Foreground="{StaticResource TextPrimary}" TextWrapping="Wrap" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock x:Name="DeviceCodeText" FontSize="22" FontWeight="Bold" FontFamily="Consolas, monospace" Foreground="#6EE7B7" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Classes="glass-btn" Padding="12,6" Click="CopyDeviceCode_Click">
+                  <StackPanel Orientation="Horizontal" Spacing="5">
+                    <PathIcon Data="{StaticResource IconCopy}" Width="13" Height="13" />
+                    <TextBlock Text="Copiar" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </Grid>
+              <TextBlock Text="Esperando aprobación..." FontSize="11" Foreground="{StaticResource TextMuted}" />
+            </StackPanel>
+          </Border>
+
+          <Button x:Name="MsLoginBtn" Classes="primary" Padding="14,11" Click="StartMsLogin_Click">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Image Source="{StaticResource IconMicrosoftColor}" Width="14" Height="14" VerticalAlignment="Center" />
+              <TextBlock Text="Iniciar sesión con Microsoft" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+
+          <TextBlock Text="O modo offline:" FontSize="11" Foreground="{StaticResource TextMuted}" />
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox x:Name="OfflineNameBox" Grid.Column="0" Watermark="Nombre de usuario" MaxLength="16" Margin="0,0,8,0" />
+            <Button Grid.Column="1" Classes="glass-btn" Padding="14,8" Content="Usar" Click="OfflineLogin_Click" />
+          </Grid>
+
+          <TextBlock x:Name="AuthErrorText" IsVisible="False" FontSize="12" Foreground="#FDA4AF" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- MODAL: Create / Import Folder (Obsidian Noir + Violet) -->
+    <Border x:Name="CreateInstanceModal" IsVisible="False" Background="#CC04020A">
+      <Border Width="500" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="24" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="24" BoxShadow="0 24 60 0 #B8000000">
+        <StackPanel Spacing="16">
+          <!-- Header with Icon Badge -->
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Border Width="40" Height="40" CornerRadius="99" Background="{StaticResource PrimaryGradient}" Margin="0,0,12,0" VerticalAlignment="Center">
+              <PathIcon x:Name="CreateModalIcon" Data="{StaticResource IconPlus}" Width="16" Height="16" Foreground="White" />
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+              <TextBlock x:Name="CreateModalTitle" Text="Nueva Instancia" FontSize="17" FontWeight="Bold" Foreground="White" />
+              <TextBlock x:Name="CreateModalSubtitle" Text="Elige versión de Minecraft y mod loader." FontSize="11.5" Foreground="{StaticResource TextMuted}" />
+            </StackPanel>
+            <Button Grid.Column="2" Classes="win-btn" VerticalAlignment="Top" Click="CloseCreateModal_Click">
+              <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+            </Button>
+          </Grid>
+
+          <!-- Folder Import Group -->
+          <Border x:Name="ImportFolderRow" IsVisible="False" Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="16" Padding="14">
+            <StackPanel Spacing="10">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon Data="{StaticResource IconFolder}" Width="13" Height="13" Foreground="#C4B5FD" />
+                <TextBlock Text="Carpeta de origen" FontSize="12" FontWeight="SemiBold" Foreground="White" />
+              </StackPanel>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox x:Name="ImportFolderPathBox" Grid.Column="0" IsReadOnly="True" Watermark="Selecciona una carpeta local..." Margin="0,0,8,0" />
+                <Button Grid.Column="1" Classes="glass-btn" Padding="14,8" Click="PickImportFolder_Click">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource IconFolder}" Width="13" Height="13" Foreground="#C4B5FD" />
+                    <TextBlock Text="Explorar" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </Grid>
+              <CheckBox x:Name="ImportCopyFilesCheck" IsVisible="False" Content="Copiar archivos al launcher (desmarcado = enlazar original)" />
+            </StackPanel>
+          </Border>
+
+          <!-- Name Group -->
+          <Border Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="16" Padding="14">
+            <StackPanel Spacing="8">
+              <TextBlock Text="Nombre de la instancia" FontSize="12" FontWeight="SemiBold" Foreground="White" />
+              <TextBox x:Name="CreateNameBox" Watermark="Ej: Mi Modpack 1.20.1" />
+            </StackPanel>
+          </Border>
+
+          <!-- Version & Loader Group -->
+          <Border Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="16" Padding="14">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="*,*">
+                <StackPanel Grid.Column="0" Spacing="6" Margin="0,0,6,0">
+                  <TextBlock Text="Versión de Minecraft" FontSize="12" FontWeight="SemiBold" Foreground="White" />
+                  <ComboBox x:Name="CreateMcVersionCombo" HorizontalAlignment="Stretch" SelectionChanged="CreateMcOrLoader_Changed" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="6" Margin="6,0,0,0">
+                  <TextBlock Text="Mod Loader" FontSize="12" FontWeight="SemiBold" Foreground="White" />
+                  <ComboBox x:Name="CreateLoaderCombo" HorizontalAlignment="Stretch" SelectionChanged="CreateMcOrLoader_Changed" />
+                </StackPanel>
+              </Grid>
+
+              <CheckBox x:Name="CreateSnapshotsCheck" Content="Incluir versiones Snapshot" IsCheckedChanged="CreateSnapshots_Changed" />
+
+              <StackPanel x:Name="CreateLoaderVerPanel" Spacing="6">
+                <TextBlock Text="Versión del Loader" FontSize="12" FontWeight="SemiBold" Foreground="White" />
+                <ComboBox x:Name="CreateLoaderVerCombo" HorizontalAlignment="Stretch" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <!-- Footer Actions -->
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,2,0,0">
+            <Button Classes="glass-btn" Padding="16,9" Content="Cancelar" Click="CloseCreateModal_Click" />
+            <Button x:Name="CreateSubmitBtn" Classes="primary" Padding="20,9" Click="SubmitCreateModal_Click">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <PathIcon Data="{StaticResource IconSave}" Width="13" Height="13" />
+                <TextBlock x:Name="CreateSubmitLabel" Text="Crear instancia" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- MODAL: Per-Instance Settings -->
+    <Border x:Name="InstSettingsModal" IsVisible="False" Background="#CC04020A">
+      <Border Width="520" MaxHeight="700" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="22" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="22" BoxShadow="0 20 50 0 #B0000000">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="1">
+                <TextBlock Text="Ajustes de instancia" FontSize="17" FontWeight="Bold" Foreground="White" />
+                <TextBlock x:Name="EditInstSubtitle" FontSize="11" Foreground="{StaticResource TextMuted}" />
+              </StackPanel>
+              <Button Grid.Column="1" Classes="win-btn" Click="CloseInstSettings_Click">
+                <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+              </Button>
+            </Grid>
+
+            <!-- Instance Image & Name -->
+            <Border Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="14" Padding="12">
+              <Grid ColumnDefinitions="Auto,*">
+                <Border Grid.Column="0" Width="62" Height="62" CornerRadius="12" ClipToBounds="True" Background="{StaticResource AvatarGradient}" BorderBrush="{StaticResource GlassBorderStrong}" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
+                  <Panel>
+                    <TextBlock x:Name="EditInstIconFallback" Text="MC" FontWeight="Bold" FontSize="18" Foreground="#DDD6FE" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Image x:Name="EditInstIconPreview" Stretch="UniformToFill" />
+                  </Panel>
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+                  <TextBox x:Name="EditInstNameBox" Watermark="Nombre de la instancia" />
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Button Classes="glass-btn" Padding="11,5" Click="PickEditIcon_Click">
+                      <StackPanel Orientation="Horizontal" Spacing="5">
+                        <PathIcon Data="{StaticResource IconImage}" Width="12" Height="12" Foreground="#C4B5FD" />
+                        <TextBlock Text="Cambiar imagen" FontSize="11" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                    <Button x:Name="ClearEditIconBtn" Classes="danger" Padding="10,5" IsVisible="False" Click="ClearEditIcon_Click">
+                      <StackPanel Orientation="Horizontal" Spacing="4">
+                        <PathIcon Data="{StaticResource IconTrash}" Width="11" Height="11" />
+                        <TextBlock Text="Quitar" FontSize="11" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                  </StackPanel>
+                </StackPanel>
+              </Grid>
+            </Border>
+
+            <!-- Screen & Resolution -->
+            <Border Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="14" Padding="12">
+              <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Text="Pantalla y Resolución" FontSize="12" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                    <Button x:Name="EditModeWindowBtn" Classes="nav-tab active" Padding="10,4" Content="Ventana" Click="EditScreenMode_Click" Tag="window" />
+                    <Button x:Name="EditModeFullBtn" Classes="nav-tab" Padding="10,4" Content="Completa" Click="EditScreenMode_Click" Tag="full" />
+                  </StackPanel>
+                </Grid>
+                <StackPanel x:Name="EditResolutionPanel" Spacing="8">
+                  <Grid ColumnDefinitions="*,*">
+                    <TextBox x:Name="EditWidthBox" Grid.Column="0" Watermark="Ancho (ej: 1280)" Margin="0,0,6,0" FontFamily="Consolas, monospace" />
+                    <TextBox x:Name="EditHeightBox" Grid.Column="1" Watermark="Alto (ej: 720)" Margin="6,0,0,0" FontFamily="Consolas, monospace" />
+                  </Grid>
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Button Classes="glass-btn" Padding="8,4" FontSize="10" Content="1280×720" Click="ResPreset_Click" Tag="1280x720" />
+                    <Button Classes="glass-btn" Padding="8,4" FontSize="10" Content="1600×900" Click="ResPreset_Click" Tag="1600x900" />
+                    <Button Classes="glass-btn" Padding="8,4" FontSize="10" Content="1920×1080" Click="ResPreset_Click" Tag="1920x1080" />
+                    <Button Classes="glass-btn" Padding="8,4" FontSize="10" Content="2560×1440" Click="ResPreset_Click" Tag="2560x1440" />
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- Folder / Move -->
+            <Border Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="14" Padding="12">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Text="Carpeta de instancia" FontSize="12" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                    <Button Classes="glass-btn" Padding="9,5" Click="EditOpenFolder_Click">
+                      <StackPanel Orientation="Horizontal" Spacing="5">
+                        <PathIcon Data="{StaticResource IconFolder}" Width="12" Height="12" />
+                        <TextBlock Text="Abrir" FontSize="11" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                    <Button Classes="primary" Padding="10,5" Click="EditMoveFolder_Click">
+                      <StackPanel Orientation="Horizontal" Spacing="5">
+                        <PathIcon Data="{StaticResource IconMove}" Width="12" Height="12" />
+                        <TextBlock Text="Mover carpeta" FontSize="11" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
+                  </StackPanel>
+                </Grid>
+                <TextBlock x:Name="EditInstPathText" FontSize="11" FontFamily="Consolas, monospace" Foreground="{StaticResource TextMuted}" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </Border>
+
+            <!-- Custom RAM -->
+            <Border Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="14" Padding="12">
+              <StackPanel Spacing="8">
+                <CheckBox x:Name="EditCustomRamCheck" Content="Usar memoria RAM personalizada" FontSize="12" Foreground="White" IsCheckedChanged="EditCustomRam_Changed" />
+                <StackPanel x:Name="EditRamSlidersPanel" IsVisible="False" Spacing="6">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="RAM Máxima" FontSize="11" Foreground="{StaticResource TextMuted}" />
+                    <TextBlock x:Name="EditMaxRamLabel" Grid.Column="1" FontSize="11" FontFamily="Consolas, monospace" Foreground="#6EE7B7" />
+                  </Grid>
+                  <Slider x:Name="EditMaxRamSlider" Minimum="2048" Maximum="16384" TickFrequency="512" IsSnapToTickEnabled="True" ValueChanged="EditRamSlider_Changed" />
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="RAM Mínima" FontSize="11" Foreground="{StaticResource TextMuted}" />
+                    <TextBlock x:Name="EditMinRamLabel" Grid.Column="1" FontSize="11" FontFamily="Consolas, monospace" Foreground="#38BDF8" />
+                  </Grid>
+                  <Slider x:Name="EditMinRamSlider" Minimum="1024" Maximum="16384" TickFrequency="512" IsSnapToTickEnabled="True" ValueChanged="EditRamSlider_Changed" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- Java & JVM -->
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="EditJavaBox" Grid.Column="0" Watermark="Java personalizado (vacío = automático)" FontFamily="Consolas, monospace" Margin="0,0,8,0" />
+              <Button Grid.Column="1" Classes="glass-btn" Padding="12,8" Content="Buscar" Click="PickEditJava_Click" />
+            </Grid>
+            <TextBox x:Name="EditJvmArgsBox" Watermark="Argumentos JVM extra (ej: -XX:+UseG1GC)" FontFamily="Consolas, monospace" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,4,0,0">
+              <Button Classes="glass-btn" Padding="15,8" Content="Cancelar" Click="CloseInstSettings_Click" />
+              <Button Classes="primary" Padding="18,8" Content="Guardar" Click="SaveInstSettings_Click" />
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Border>
+
+    <!-- MODAL: CurseForge Modpack Files & Details -->
+    <Border x:Name="CfModal" IsVisible="False" Background="#CC04020A">
+      <Border Width="780" Height="640" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="22" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="24" BoxShadow="0 24 60 0 #B8000000">
+        <Grid RowDefinitions="Auto,Auto,Auto,*">
+          <!-- Header -->
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+            <Border Grid.Column="0" Width="60" Height="60" CornerRadius="13" ClipToBounds="True" Background="#1AFFFFFF" BorderBrush="{StaticResource GlassBorderStrong}" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
+              <Image x:Name="CfModalLogo" Stretch="UniformToFill" />
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4" Margin="0,0,12,0">
+              <TextBlock x:Name="CfModalTitle" FontSize="18" FontWeight="Bold" Foreground="White" TextTrimming="CharacterEllipsis" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock x:Name="CfModalAuthor" FontSize="11.5" Foreground="#C4B5FD" VerticalAlignment="Center" />
+                <TextBlock Text="·" FontSize="11.5" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" />
+                <TextBlock x:Name="CfModalDownloads" FontSize="11.5" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" />
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+              <Button x:Name="CfModalWebBtn" Classes="glass-btn" Padding="11,6" Content="Web" Click="CfModalOpenWeb_Click" ToolTip.Tip="Abrir en CurseForge" />
+              <Button Classes="win-btn" Click="CloseCfModal_Click">
+                <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+              </Button>
+            </StackPanel>
+          </Grid>
+
+          <TextBlock x:Name="CfModalSummary" Grid.Row="1" FontSize="12" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" MaxLines="2" Margin="0,0,0,12" />
+
+          <!-- Tabs -->
+          <Border Grid.Row="2" CornerRadius="99" Background="#FF05030A" BorderBrush="#22FFFFFF" BorderThickness="1" Padding="4" HorizontalAlignment="Left" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Spacing="3">
+              <Button x:Name="CfTabFilesBtn" Classes="nav-tab active" Padding="14,5" Content="Versiones" Click="CfModalTab_Click" Tag="files" />
+              <Button x:Name="CfTabDescBtn" Classes="nav-tab" Padding="14,5" Content="Descripción" Click="CfModalTab_Click" Tag="desc" />
+            </StackPanel>
+          </Border>
+
+          <!-- Content -->
+          <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+            <Panel Margin="0,0,14,0">
+              <StackPanel x:Name="CfFilesList" Spacing="8" />
+              <Border x:Name="CfDescPanel" IsVisible="False" Background="{StaticResource GlassInnerBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" CornerRadius="14" Padding="16">
+                <TextBlock x:Name="CfModalDescText" FontSize="12.5" Foreground="#E2DFF0" TextWrapping="Wrap" LineHeight="20" Text="Cargando descripción..." />
+              </Border>
+            </Panel>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Border>
+
+    <!-- MODAL: Instance Details (General, Mods, Resource Packs, Shaders, Datapacks) -->
+    <Border x:Name="InstDetailsModal" IsVisible="False" Background="#CC04020A" DragDrop.AllowDrop="True">
+      <Border Width="780" Height="620" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="22" Background="{StaticResource GlassCardBg}" BorderBrush="{StaticResource GlassBorder}" BorderThickness="1" Padding="24" BoxShadow="0 24 60 0 #B8000000">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+          <!-- Header -->
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,14">
+            <Border Grid.Column="0" Width="60" Height="60" CornerRadius="13" ClipToBounds="True" Background="{StaticResource AvatarGradient}" BorderBrush="{StaticResource GlassBorderStrong}" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
+              <Panel>
+                <TextBlock x:Name="DetailInstIconFallback" Text="MC" FontWeight="Bold" FontSize="18" Foreground="#DDD6FE" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Image x:Name="DetailInstIconPreview" Stretch="UniformToFill" />
+              </Panel>
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="5">
+              <TextBlock x:Name="DetailInstName" FontSize="18" FontWeight="Bold" Foreground="White" TextTrimming="CharacterEllipsis" />
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Border Background="#0D091A" BorderBrush="#2A2958" BorderThickness="1" CornerRadius="99" Padding="9,3">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Border Width="6" Height="6" CornerRadius="99" Background="#A78BFA" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DetailInstMcChip" FontSize="11" FontWeight="SemiBold" Foreground="#F5F3FF" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Border>
+                <Border Background="#0D091A" BorderBrush="#2A2958" BorderThickness="1" CornerRadius="99" Padding="9,3">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Border Width="6" Height="6" CornerRadius="99" Background="#7C3AED" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DetailInstLoaderChip" FontSize="11" FontWeight="SemiBold" Foreground="#F5F3FF" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Border>
+                <Border Background="#0D091A" BorderBrush="#2A2958" BorderThickness="1" CornerRadius="99" Padding="9,3">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Border Width="6" Height="6" CornerRadius="99" Background="#34D399" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DetailInstSourceChip" FontSize="11" FontWeight="SemiBold" Foreground="#F5F3FF" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+              <Button x:Name="DetailUpdateBtn" Classes="primary" Padding="10,6" IsVisible="False" Click="DetailUpdateModpack_Click" ToolTip.Tip="Buscar actualización en CurseForge">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                  <PathIcon Data="{StaticResource IconRotate}" Width="12" Height="12" />
+                  <TextBlock Text="Actualizar" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Classes="glass-btn" Padding="10,6" Click="DetailOpenFolder_Click" ToolTip.Tip="Abrir carpeta">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                  <PathIcon Data="{StaticResource IconFolder}" Width="12" Height="12" />
+                  <TextBlock Text="Carpeta" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Classes="glass-btn" Padding="10,6" Click="DetailOpenSettings_Click" ToolTip.Tip="Ajustes de instancia">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                  <PathIcon Data="{StaticResource IconSettings}" Width="12" Height="12" />
+                  <TextBlock Text="Ajustes" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Classes="win-btn" Click="CloseInstDetails_Click">
+                <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+              </Button>
+            </StackPanel>
+          </Grid>
+
+          <!-- Tabs -->
+          <Border Grid.Row="1" CornerRadius="99" Background="#FF05030A" BorderBrush="#22FFFFFF" BorderThickness="1" Padding="4" HorizontalAlignment="Left" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Spacing="3">
+              <Button x:Name="DetailTabGeneral" Classes="nav-tab active" Padding="12,5" Content="General" Click="DetailTab_Click" Tag="general" />
+              <Button x:Name="DetailTabMods" Classes="nav-tab" Padding="12,5" Content="Mods" Click="DetailTab_Click" Tag="mods" />
+              <Button x:Name="DetailTabResourcePacks" Classes="nav-tab" Padding="12,5" Content="Resource Packs" Click="DetailTab_Click" Tag="resourcepacks" />
+              <Button x:Name="DetailTabShaders" Classes="nav-tab" Padding="12,5" Content="Shaders" Click="DetailTab_Click" Tag="shaders" />
+              <Button x:Name="DetailTabDatapacks" Classes="nav-tab" Padding="12,5" Content="Datapacks" Click="DetailTab_Click" Tag="datapacks" />
+            </StackPanel>
+          </Border>
+
+          <!-- Filter box (shown for list tabs) -->
+          <TextBox x:Name="DetailFilterBox" Grid.Row="2" IsVisible="False" Watermark="Filtrar archivos..." Margin="0,0,0,10" TextChanged="DetailFilterBox_Changed" />
+
+          <!-- CurseForge Sync Notice Banner (shown in Mods tab for CF modpacks) -->
+          <Border x:Name="DetailCfSyncBanner" Grid.Row="3" IsVisible="False" Background="#16FFFFFF" BorderBrush="#18FFFFFF" BorderThickness="1" CornerRadius="12" Padding="12,9" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,12,0" VerticalAlignment="Center">
+                <TextBlock Text="Modpack sincronizado con CurseForge" FontSize="12" FontWeight="SemiBold" Foreground="#DDD6FE" />
+                <TextBlock Text="Desactivar, borrar o añadir mods puede afectar la compatibilidad." FontSize="11" Foreground="#B4AEC9" TextWrapping="Wrap" />
+              </StackPanel>
+              <Button x:Name="DetailRestoreModsBtn" Grid.Column="1" Classes="glass-btn" Padding="11,6" VerticalAlignment="Center" Click="DetailRestoreMods_Click">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                  <PathIcon Data="{StaticResource IconRotate}" Width="12" Height="12" Foreground="#C4B5FD" />
+                  <TextBlock Text="Restaurar mods" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+          </Border>
+
+          <!-- Drag & Drop Zone + Add Mod Button (shown in Mods tab) -->
+          <Border x:Name="DetailModDropZone" Grid.Row="4" IsVisible="False" Background="#12FFFFFF" BorderBrush="#1CFFFFFF" BorderThickness="1" CornerRadius="12" Padding="12,8" Margin="0,0,0,10">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,10,0">
+                <PathIcon x:Name="DetailDropZoneIcon" Data="{StaticResource IconDownload}" Width="14" Height="14" Foreground="#C4B5FD" />
+                <TextBlock x:Name="DetailDropZoneText" Text="Arrastra y suelta archivos .jar aquí para añadir mods" FontSize="11.5" FontWeight="Medium" Foreground="#DDD6FE" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+              <Button x:Name="DetailAddModBtn" Grid.Column="1" Classes="primary" Padding="12,6" Click="DetailAddMod_Click">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource IconPlus}" Width="12" Height="12" />
+                  <TextBlock Text="Añadir mod (.jar)" FontSize="11.5" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+          </Border>
+
+          <!-- Content -->
+          <ScrollViewer Grid.Row="5" VerticalScrollBarVisibility="Auto">
+            <Panel Margin="0,0,14,0">
+              <StackPanel x:Name="DetailGeneralPanel" Spacing="10" />
+              <StackPanel x:Name="DetailItemsPanel" IsVisible="False" Spacing="6" />
+            </Panel>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Border>
+  </Grid>
+</Window>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="boltGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#DDD6FE" />
+      <stop offset="55%" stop-color="#A78BFA" />
+      <stop offset="100%" stop-color="#6D5CAE" />
+    </linearGradient>
+    <linearGradient id="kGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD" />
+      <stop offset="100%" stop-color="#6D5CAE" />
+    </linearGradient>
+  </defs>
+
+  <path d="M 68,58 C 68,48 76,40 86,40 L 104,40 L 104,102 L 84,126 C 80,131 81,138 87,140 L 104,145 L 104,174 C 104,185 95,194 84,194 L 68,194 Z" fill="url(#kGrad)" />
+  <path d="M 162,146 L 198,194 L 166,194 C 154,194 144,186 140,175 L 136,164 Z" fill="url(#kGrad)" />
+  <path d="M 196,20 L 90,130 L 136,130 L 104,236 L 188,108 L 146,108 Z" fill="url(#boltGrad)" />
+</svg>
